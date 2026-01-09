@@ -5,7 +5,7 @@ import { verifyToken } from "../Middleware/AuthMiddleware";
 const router = express.Router();
 
 // rota de login
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/auth/login", async (req: Request, res: Response) => {
   try {
     // extrair nome e senha do corpo da requisição
     const { nome, senha } = req.body;
@@ -25,8 +25,13 @@ router.post("/login", async (req: Request, res: Response) => {
     
     // retornar a resposta de sucesso
     res.status(200).json({
-      message: "Login realizado com sucesso!",
-      user: userData,
+      mensagem: "Login realizado com sucesso!",
+      token: userData.token,
+      usuario: {
+        id: userData.id,
+        nome: userData.nome,
+        role: userData.role,
+      },
     });
     return;
   } catch (error: any) {
@@ -39,7 +44,7 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 // rota de validação de token
-router.get("/validate-token", verifyToken, async (req: Request, res: Response) => {
+router.get("/auth/validate-token", verifyToken, async (req: Request, res: Response) => {
   res.status(200).json({
     message: "Token válido!",
     userId: (req as any).userId,

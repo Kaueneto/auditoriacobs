@@ -35,9 +35,15 @@ export class LancamentosHonorarios {
   @Column({ type: "date" })
   vencimento_honorario!: Date;
 
+  @Column()
+  id_user_lancamento!: number;
+
   @ManyToOne(() => Users)
   @JoinColumn({ name: "id_user_lancamento" })
   usuarioLancamento!: Users;
+
+  @Column({ nullable: true })
+  id_user_auditou!: number | null;
 
   @ManyToOne(() => Users, { nullable: true })
   @JoinColumn({ name: "id_user_auditou" })
@@ -49,9 +55,15 @@ export class LancamentosHonorarios {
   @Column()
   tipo_inclusao!: string; // INDIVIDUAL | LOTE
 
+  @Column({ nullable: true })
+  id_lote!: number | null;
+
   @ManyToOne(() => LoteLancamento, { nullable: true })
   @JoinColumn({ name: "id_lote" })
   lote!: LoteLancamento | null;
+
+  @Column({ nullable: true })
+  id_fechamento_auditoria!: number | null;
 
   @ManyToOne(() => Fechamento, { nullable: true })
   @JoinColumn({ name: "id_fechamento_auditoria" })

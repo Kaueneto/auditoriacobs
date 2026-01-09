@@ -11,7 +11,7 @@ router.post("/users", async (req: Request, res: Response) => {
   try {
     const schema = yup.object().shape({
       nome: yup.string().required("O nome é obrigatório").min(3),
-      senha: yup.string().required("A senha é obrigatória").min(6),
+      senha_hash: yup.string().required("A senha é obrigatória").min(6),
       role: yup.number().required("O role é obrigatório"),
       ativo: yup.boolean().required("O campo ativo é obrigatório"),
     });
@@ -27,7 +27,7 @@ router.post("/users", async (req: Request, res: Response) => {
     }
 
     // criptografar a senha 
-    const hashedPassword = await bcrypt.hash(req.body.senha, 10);
+    const hashedPassword = await bcrypt.hash(req.body.senha_hash, 10);
 
     const user = userRepository.create({
       nome: req.body.nome,

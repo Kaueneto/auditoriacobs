@@ -10,6 +10,7 @@ import { Metas } from "./entities/Metas";
 
 //importar variavies de ambiente
 import dotenv from "dotenv";
+import { Empresas } from "./entities/Empresas";
 //carregar as variaveis  do arquivo .env
 dotenv.config();
 
@@ -25,9 +26,9 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: false,
   logging: true,
-  entities: [Users, LancamentosHonorarios, LoteLancamento, Fechamento, Metas],
+  entities: [Users, LancamentosHonorarios, LoteLancamento, Fechamento, Metas, Empresas],
   subscribers: [],
-  migrations: [__dirname + "/migration/*.ts"],
+  migrations: [__dirname + "/migrations/*.ts"],
 });
 //inicializar conexao com bd
 
@@ -45,6 +46,10 @@ AppDataSource.initialize()
     } else {
       console.log("Nenhuma migration pendente.");
     }
+
+    // Executar seeds
+    const { seedEmpresas } = await import("./seeds/seedEmpresas");
+    await seedEmpresas();
   })
   .catch((error) => {
     console.log("erro na conexao com o banco de dados!", error);

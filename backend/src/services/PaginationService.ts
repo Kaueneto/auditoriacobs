@@ -15,7 +15,7 @@ export class PaginationService {
   static async paginate<T extends ObjectLiteral>(   
     repository: Repository<T>,
     page: number = 1,
-    limit: number = 10,
+    limit: number = 20,
     order: FindOptionsOrder<T> = {},
     relations?: string[]
   ): Promise<PaginationResult<T>> {

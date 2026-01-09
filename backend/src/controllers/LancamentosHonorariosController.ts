@@ -1,13 +1,14 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { LancamentosHonorarios } from "../entities/LancamentosHonorarios";
+import { PaginationService } from "../services/PaginationService";
 import * as yup from "yup";
 import { verifyToken } from "../Middleware/AuthMiddleware";
 import { Not, Between, Like } from "typeorm";
 
 const router = express.Router();
 
-// listar todos os lancamentos - com filtro
+// listar todos os lancamentos - com filtro e paginação
 router.get("/lancamentos", verifyToken, async (req: Request, res: Response) => {
   try {
     const repository = AppDataSource.getRepository(LancamentosHonorarios);
@@ -24,20 +25,38 @@ router.get("/lancamentos", verifyToken, async (req: Request, res: Response) => {
     if (data_inicio && data_fim)
       where.data_lancamento = Between(new Date(data_inicio as string), new Date(data_fim as string));
 
-    const [lancamentos, total] = await repository.findAndCount({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { id: "DESC" },
-    });
+    // Usar QueryBuilder para aplicar filtros dinamicamente
+    let query = repository.createQueryBuilder("lancamento");
+
+    if (empresa) query = query.where("lancamento.empresa LIKE :empresa", { empresa: `%${empresa}%` });
+    if (cpf_cnpj) query = query.andWhere("lancamento.cpf_cnpj LIKE :cpf_cnpj", { cpf_cnpj: `%${cpf_cnpj}%` });
+    if (nome_cliente) query = query.andWhere("lancamento.nome_cliente LIKE :nome_cliente", { nome_cliente: `%${nome_cliente}%` });
+    if (data_inicio && data_fim)
+      query = query.andWhere("lancamento.data_lancamento BETWEEN :data_inicio AND :data_fim", {
+        data_inicio: new Date(data_inicio as string),
+        data_fim: new Date(data_fim as string),
+      });
+
+    // Contar total antes de aplicar paginação
+    const totalRecords = await query.getCount();
+    const lastPage = Math.ceil(totalRecords / limit);
+
+    const offset = (page - 1) * limit;
+
+    const lancamentos = await query
+      .orderBy("lancamento.id", "DESC")
+      .skip(offset)
+      .take(limit)
+      .getMany();
 
     res.status(200).json({
       data: lancamentos,
-      total,
+      total: totalRecords,
       page,
-      last_page: Math.ceil(total / limit),
+      last_page: lastPage,
     });
   } catch (error) {
+    console.error("Erro ao listar lançamentos:", error);
     res.status(500).json({ mensagem: "Erro ao listar lançamentos" });
   }
 });
@@ -62,7 +81,7 @@ router.get("/lancamentos/:id", verifyToken, async (req: Request, res: Response) 
 router.post("/lancamentos", verifyToken, async (req: Request, res: Response) => {
   try {
     const schema = yup.object().shape({
-      codigo_pessoaUAU: yup.string().required(),
+      codigo_pessoaUAU: yup.string().nullable().optional(),
       cpf_cnpj: yup.string().required(),
       nome_cliente: yup.string().required(),
       empresa: yup.string().required(),
@@ -72,22 +91,38 @@ router.post("/lancamentos", verifyToken, async (req: Request, res: Response) => 
       valor_parcela: yup.number().required().min(0),
       vencimento_honorario: yup.date().required(),
       id_user_lancamento: yup.number().required(),
-      tipo_inclusao: yup.string().oneOf(["individual", "lote"]).required(),
-      id_lote: yup.number().nullable(),
+      observacoes: yup.string().nullable().optional(),
+      tipo_inclusao: yup.string().required().oneOf(["INDIVIDUAL", "LOTE"]),
+      id_lote: yup.number().nullable().optional(),
     });
 
     await schema.validate(req.body, { abortEarly: false });
 
     const repository = AppDataSource.getRepository(LancamentosHonorarios);
 
-    const lancamento = repository.create({
-      ...req.body,
+    // Preparar dados e converter tipos
+    const dados = {
+      codigo_pessoaUAU: req.body.codigo_pessoaUAU || null,
+      cpf_cnpj: req.body.cpf_cnpj,
+      nome_cliente: req.body.nome_cliente,
+      empresa: req.body.empresa,
+      qtde_parcelas_pagas: Number(req.body.qtde_parcelas_pagas),
+      numero_vendas: req.body.numero_vendas,
+      valor_honorarios: String(req.body.valor_honorarios),
+      valor_parcela: String(req.body.valor_parcela),
+      vencimento_honorario: req.body.vencimento_honorario,
+      id_user_lancamento: Number(req.body.id_user_lancamento),
+      observacoes: req.body.observacoes || null,
+      tipo_inclusao: req.body.tipo_inclusao,
+      id_lote: req.body.id_lote || null,
       auditado: false,
       id_user_auditou: null,
       data_lancamento: new Date(),
       data_ult_edicao: new Date(),
       id_fechamento_auditoria: null,
-    });
+    };
+
+    const lancamento = repository.create(dados);
 
     await repository.save(lancamento);
 
@@ -96,7 +131,8 @@ router.post("/lancamentos", verifyToken, async (req: Request, res: Response) => 
     if (error instanceof yup.ValidationError)
       return res.status(400).json({ mensagem: error.errors });
 
-    res.status(500).json({ mensagem: "Erro ao criar lançamento" });
+    console.error("Erro ao criar lançamento:", error);
+    res.status(500).json({ mensagem: "Erro ao criar lançamento", erro: error });
   }
 });
 

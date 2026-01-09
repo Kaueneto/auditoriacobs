@@ -10,3 +10,8 @@ npm install pg @types/pg
 ```bash
  npm install bcrypt
 ```
+### datepicker
+```bash
+npm install --save-dev @types/react-datepicker
+```
+
