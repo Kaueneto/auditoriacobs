@@ -23,6 +23,13 @@ export class Users {
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   data_cadastro!: Date;
 
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
+  data_ult_edicao!: Date;
+
   /* RELAÇÕES */
   @OneToMany(() => LancamentosHonorarios, (l) => l.usuarioLancamento)
   lancamentos!: LancamentosHonorarios[];

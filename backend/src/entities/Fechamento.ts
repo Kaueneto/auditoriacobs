@@ -21,7 +21,7 @@ export class Fechamento {
   usuarioCobranca!: Users;
 
   @ManyToOne(() => Users)
-  @JoinColumn({ name: "usuario_auditoria" })
+  @JoinColumn({ name: "usuario_auditoria_id" })
   usuarioAuditoria!: Users;
 
   @Column({ type: "decimal", precision: 15, scale: 2 })

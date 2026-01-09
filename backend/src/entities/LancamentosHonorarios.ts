@@ -66,4 +66,13 @@ export class LancamentosHonorarios {
     onUpdate: "CURRENT_TIMESTAMP",
   })
   data_ult_edicao!: Date;
+
+  @Column({ type: "timestamp", nullable: true })
+  data_auditoria!: Date | null;
+
+  @Column({ nullable: true })
+  observacoes!: string | null;
+
+  @Column({ default: "PENDENTE" })
+  status_lancamento!: string;
 }
