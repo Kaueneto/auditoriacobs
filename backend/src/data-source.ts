@@ -6,7 +6,7 @@ import { Users } from "./entities/Users";
 import { LancamentosHonorarios } from "./entities/LancamentosHonorarios";
 import { LoteLancamento } from "./entities/LoteLancamento";
 import { Fechamento } from "./entities/Fechamento";
-import { Meta } from "./entities/Meta";
+import { Metas } from "./entities/Metas";
 
 //importar variavies de ambiente
 import dotenv from "dotenv";
@@ -25,7 +25,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: false,
   logging: true,
-  entities: [Users, LancamentosHonorarios, LoteLancamento, Fechamento, Meta],
+  entities: [Users, LancamentosHonorarios, LoteLancamento, Fechamento, Metas],
   subscribers: [],
   migrations: [__dirname + "/migration/*.ts"],
 });
