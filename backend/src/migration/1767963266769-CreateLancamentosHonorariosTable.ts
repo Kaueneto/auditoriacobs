@@ -81,17 +81,17 @@ export class CreateLancamentosHonorariosTable1767963266769 implements MigrationI
           },
           {
             name: "data_lancamento",
-            type: "timestamptz",
-            default: "now()",
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP",
           },
           {
             name: "data_auditoria",
-            type: "timestamptz",
+            type: "timestamp",
             isNullable: true,
           },
           {
             name: "data_ult_edicao",
-            type: "timestamptz",
+            type: "timestamp",
             isNullable: true,
           },
           {

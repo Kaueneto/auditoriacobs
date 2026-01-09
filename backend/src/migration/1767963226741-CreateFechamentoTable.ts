@@ -18,12 +18,12 @@ export class CreateFechamentoTable1767963226741 implements MigrationInterface {
 
           {
             name: "periodo_inicio",
-            type: "timestamptz",
+            type: "timestamp",
             isNullable: false,
           },
           {
             name: "periodo_fim",
-            type: "timestamptz",
+            type: "timestamp",
             isNullable: false,
           },
           {

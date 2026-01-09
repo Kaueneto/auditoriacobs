@@ -27,13 +27,24 @@ export const AppDataSource = new DataSource({
   logging: true,
   entities: [Users, LancamentosHonorarios, LoteLancamento, Fechamento, Meta],
   subscribers: [],
-  migrations: [__dirname + "/migration/*.js"],
+  migrations: [__dirname + "/migration/*.ts"],
 });
 //inicializar conexao com bd
 
 AppDataSource.initialize()
-  .then(() => {
+  .then(async () => {
     console.log("Banco de dados conectado com sucesso!");
+    
+    // verificar e executar migrations pendentes
+    const pendingMigrations = await AppDataSource.showMigrations();
+    
+    if (pendingMigrations) {
+      console.log("Executando migrations pendentes...");
+      await AppDataSource.runMigrations();
+      console.log("Migrations executadas com sucesso!");
+    } else {
+      console.log("Nenhuma migration pendente.");
+    }
   })
   .catch((error) => {
     console.log("erro na conexao com o banco de dados!", error);

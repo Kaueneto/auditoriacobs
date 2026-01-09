@@ -11,7 +11,9 @@
     "dev": "ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/src/index.js",
-    "start:watch": "nodemon --exec ts-node src/index.ts"
+    "start:watch": "nodemon --exec ts-node src/index.ts",
+    "migration:show": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:show -d src/data-source.ts",
+    "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts"
   },
   "dependencies": {
     "@types/bcrypt": "^6.0.0",

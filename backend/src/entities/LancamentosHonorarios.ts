@@ -70,9 +70,9 @@ export class LancamentosHonorarios {
   @Column({ type: "timestamp", nullable: true })
   data_auditoria!: Date | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   observacoes!: string | null;
 
-  @Column({ default: "PENDENTE" })
+  @Column({ type: "varchar", default: "PENDENTE" })
   status_lancamento!: string;
 }
